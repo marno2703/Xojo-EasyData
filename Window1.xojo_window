@@ -99,7 +99,7 @@ Begin Window Window1
       Bold            =   False
       DataField       =   ""
       DataSource      =   ""
-      Enabled         =   True
+      Enabled         =   False
       Height          =   20
       HelpTag         =   ""
       Index           =   -2147483648
@@ -133,7 +133,7 @@ Begin Window Window1
       Bold            =   False
       DataField       =   ""
       DataSource      =   ""
-      Enabled         =   True
+      Enabled         =   False
       Height          =   20
       HelpTag         =   ""
       Index           =   -2147483648
@@ -167,7 +167,7 @@ Begin Window Window1
       Bold            =   False
       DataField       =   ""
       DataSource      =   ""
-      Enabled         =   True
+      Enabled         =   False
       Height          =   20
       HelpTag         =   ""
       Index           =   -2147483648
@@ -231,7 +231,7 @@ Begin Window Window1
       DataField       =   ""
       DataSource      =   ""
       DefaultRowHeight=   -1
-      Enabled         =   True
+      Enabled         =   False
       EnableDrag      =   False
       EnableDragReorder=   False
       GridLinesHorizontal=   0
@@ -281,7 +281,7 @@ Begin Window Window1
       CueText         =   ""
       DataField       =   ""
       DataSource      =   ""
-      Enabled         =   True
+      Enabled         =   False
       Format          =   ""
       Height          =   22
       HelpTag         =   ""
@@ -323,7 +323,7 @@ Begin Window Window1
       CueText         =   ""
       DataField       =   ""
       DataSource      =   ""
-      Enabled         =   True
+      Enabled         =   False
       Format          =   ""
       Height          =   22
       HelpTag         =   ""
@@ -365,7 +365,7 @@ Begin Window Window1
       CueText         =   ""
       DataField       =   ""
       DataSource      =   ""
-      Enabled         =   True
+      Enabled         =   False
       Format          =   ""
       Height          =   22
       HelpTag         =   ""
@@ -407,7 +407,7 @@ Begin Window Window1
       CueText         =   ""
       DataField       =   ""
       DataSource      =   ""
-      Enabled         =   True
+      Enabled         =   False
       Format          =   ""
       Height          =   22
       HelpTag         =   ""
@@ -497,7 +497,7 @@ Begin Window Window1
       DataField       =   ""
       DataSource      =   ""
       DefaultRowHeight=   -1
-      Enabled         =   True
+      Enabled         =   False
       EnableDrag      =   False
       EnableDragReorder=   False
       GridLinesHorizontal=   0
@@ -547,7 +547,7 @@ Begin Window Window1
       DataField       =   ""
       DataSource      =   ""
       DefaultRowHeight=   -1
-      Enabled         =   True
+      Enabled         =   False
       EnableDrag      =   False
       EnableDragReorder=   False
       GridLinesHorizontal=   0
@@ -677,6 +677,7 @@ End
 		  edTableContacts.controlFields = Array( "UUID", "Company", "NameFirst", "NameLast" )
 		  
 		  // Populate the Data into the ListBox
+		  edTableContacts.controlsEnable = true // make the controls enabled after being set. Default is true 
 		  edTableContacts.listBoxHeader = Array ( "Company", "First Name", "Last Name" )
 		  edTableContacts.listBoxFields = Array ( "Company", "NameFirst", "NameLast" )
 		  edTableContacts.controlsSet( "ContactsListbox", -2 )  // -2 = all records
@@ -689,7 +690,9 @@ End
 #tag Events ContactsListbox
 	#tag Event
 		Sub Change()
+		  
 		  edTableContacts.controlsSet( "", me.ListIndex )  // -2 = all records
+		  UUIDTextField.Enabled = false
 		  
 		  // ================================================
 		  
@@ -704,6 +707,7 @@ End
 		  edTableContactsAddresses.loadFromDB
 		  
 		  // Populate the Data into the ListBox
+		  edTableContactsAddresses.controlsEnable = true  // make the controls enabled after being set. Default is true 
 		  edTableContactsAddresses.listBoxHeader = Array ( "Street", "City", "State", "Zip", "County" )
 		  edTableContactsAddresses.listBoxFields = Array ( "Street", "City", "State", "Zip", "County" )
 		  edTableContactsAddresses.controlsSet( "ContactsAddressesListbox", -2 )  // -2 = all records
@@ -721,6 +725,7 @@ End
 		  edTableContactsComms.loadFromDB
 		  
 		  // Populate the Data into the ListBox
+		  edTableContactsComms.controlsEnable = true  // make the controls enabled after being set. Default is true 
 		  edTableContactsComms.listBoxHeader = Array ( "Type", "Data" )
 		  edTableContactsComms.listBoxFields = Array ( "Type", "Data" )
 		  edTableContactsComms.controlsSet( "ContactsCommsListbox", -2 )  // -2 = all records

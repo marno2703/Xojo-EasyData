@@ -47,6 +47,8 @@ Inherits control
 		        
 		      Next
 		      
+		      ListBox( theControl ).Enabled = controlsEnable
+		      
 		    end if
 		    
 		    // =========================================
@@ -62,6 +64,7 @@ Inherits control
 		      if theControl IsA TextField then
 		        if dict( pRow ).HasKey( controlFields( registeredControlIndex ) ) then
 		          TextField( theControl ).Text = dict( pRow ).Value( controlFields( registeredControlIndex ) )
+		          TextField( theControl ).Enabled = controlsEnable
 		        end if
 		      end if
 		      
@@ -158,6 +161,10 @@ Inherits control
 
 	#tag Property, Flags = &h0
 		controlNames() As text
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		controlsEnable As Boolean = true
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
