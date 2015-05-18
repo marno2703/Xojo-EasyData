@@ -2,15 +2,43 @@
 Protected Class edTable
 Inherits control
 	#tag Method, Flags = &h0
-		Sub controlsSet(pControlName as text, pRow as Integer)
+		Sub controlRegister(pName as text, pField as text, pLabel as text, pEnable as Boolean)
+		  ReDim controlDict( controlDict.Ubound + 1 )
+		  controlDict( controlDict.Ubound ) = new Dictionary
+		  
+		  controlDict( controlDict.Ubound ).Value( "Type" ) = "Controls"
+		  controlDict( controlDict.Ubound ).Value( "Name" ) = pName
+		  controlDict( controlDict.Ubound ).Value( "Field" ) = pField
+		  controlDict( controlDict.Ubound ).Value( "Label" ) = pLabel
+		  controlDict( controlDict.Ubound ).Value( "Enable" ) = pEnable
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub controlRegisterListbox(pName as text, pHeader() as text, pFields() as text, pEnable as Boolean)
+		  ReDim controlDict( controlDict.Ubound + 1 )
+		  controlDict( controlDict.Ubound ) = new Dictionary
+		  
+		  controlDict( controlDict.Ubound ).Value( "Type" ) = "Listbox"
+		  controlDict( controlDict.Ubound ).Value( "Name" ) = pName
+		  controlDict( controlDict.Ubound ).Value( "Headers" ) = pHeader()
+		  controlDict( controlDict.Ubound ).Value( "Fields" ) = pFields()
+		  controlDict( controlDict.Ubound ).Value( "Enable" ) = pEnable
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub controlSet(pControlName as text, pRow as Integer)
 		  
 		  // Set the Controls if there is a Dictionary Entry
 		  dim theControl as Control
 		  dim theControlName as text
 		  dim controlIndex as Integer
 		  
-		  dim registeredControlIndex as Integer
-		  dim registeredControlName, registeredControlField, registeredControlLabel as text
+		  dim theControlDictElement as Integer
+		  dim theListboxHeaders(), theListboxFields() as text
+		  
+		  dim tempText as text
 		  
 		  // Look at each Control in the Container
 		  For controlIndex = 0 To me.Window.ControlCount - 1
@@ -24,48 +52,47 @@ Inherits control
 		      // Clear the ListBox
 		      ListBox( theControl ).DeleteAllRows
 		      
+		      theControlDictElement = findControlDictElement( pControlName )
+		      
 		      // Set the Number of Columns in the ListBox
-		      ListBox( theControl ).ColumnCount = listBoxHeader.Ubound + 1  // theDictionary( 0 ).Count = the total fields in the Dictionary
+		      theListboxHeaders() = controlDict( theControlDictElement ).Value( "Headers" )
+		      theListboxFields() = controlDict( theControlDictElement ).Value( "Fields" )
+		      ListBox( theControl ).ColumnCount = theListboxHeaders.Ubound + 1
 		      
 		      // For Each Dictionary Array Element / Record
-		      For theDictIndex as Integer = 0 to dict.Ubound
+		      For theDictIndex as Integer = 0 to dataDict.Ubound
 		        ListBox( theControl ).AddRow()
 		        
 		        //--------- Set the Header
 		        ListBox( theControl ).heading( -1 ) = ""
-		        For theHeaderNamesIndex as Integer = 0 to listBoxHeader.Ubound
-		          ListBox( theControl ).heading( theHeaderNamesIndex ) = listBoxHeader( theHeaderNamesIndex )
+		        For theHeaderNamesIndex as Integer = 0 to theListboxHeaders.Ubound
+		          ListBox( theControl ).heading( theHeaderNamesIndex ) = theListboxHeaders( theHeaderNamesIndex )
 		        Next
 		        //---------
 		        
 		        //--------- Set the ListBox Rows
-		        ListBox( theControl ).RowTag( ListBox( theControl ).LastIndex ) = dict( theDictIndex ).Value( tableKeyName )
-		        For theFieldNamesIndex as Integer = 0 to listBoxFields.Ubound
-		          ListBox( theControl ).Cell( ListBox( theControl ).LastIndex, theFieldNamesIndex ) = dict( theDictIndex ).Value( listBoxFields( theFieldNamesIndex ) )
+		        ListBox( theControl ).RowTag( ListBox( theControl ).LastIndex ) = dataDict( theDictIndex ).Value( tableKeyName )
+		        For theFieldNamesIndex as Integer = 0 to theListboxFields.Ubound
+		          ListBox( theControl ).Cell( ListBox( theControl ).LastIndex, theFieldNamesIndex ) = dataDict( theDictIndex ).Value( theListboxFields( theFieldNamesIndex ) )
 		        Next
 		        //---------
 		        
 		      Next
 		      
-		      ListBox( theControl ).Enabled = controlsEnable
+		      ListBox( theControl ).Enabled = controlDict( theControlDictElement ).Value( "Enable" )
 		      
 		    end if
 		    
 		    // =========================================
 		    
 		    // Populate our Controls
-		    registeredControlIndex = controlNames.IndexOf( theControlName )   // get the index from our list of controls
-		    if pControlName = "" and registeredControlIndex > -1 then
-		      registeredControlName = controlNames( registeredControlIndex )
-		      registeredControlField = controlFields( registeredControlIndex )
-		      registeredControlLabel = controlLabels( registeredControlIndex )
+		    theControlDictElement = findControlDictElement( theControlName )
+		    if pControlName = "Controls" and theControlDictElement > -1 then
 		      
 		      // TextFields
 		      if theControl IsA TextField then
-		        if dict( pRow ).HasKey( controlFields( registeredControlIndex ) ) then
-		          TextField( theControl ).Text = dict( pRow ).Value( controlFields( registeredControlIndex ) )
-		          TextField( theControl ).Enabled = controlsEnable
-		        end if
+		        TextField( theControl ).Text = dataDict( pRow ).Value( controlDict( theControlDictElement ).Value( "Field" ) )
+		        TextField( theControl ).Enabled = controlDict( theControlDictElement ).Value( "Enable" )
 		      end if
 		      
 		    end if
@@ -77,9 +104,25 @@ Inherits control
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function findControlDictElement(pControlName as text) As integer
+		  
+		  
+		  For theIndex as Integer = 0 to controlDict.Ubound
+		    
+		    if controlDict( theIndex).Value( "Name" ) = pControlName then
+		      return theIndex
+		    end if
+		    
+		  next
+		  
+		  return -1
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub loadFromDB()
 		  // Reset the Dictionary
-		  ReDim dict(-1)
+		  ReDim dataDict(-1)
 		  
 		  // Select the Records
 		  Dim sql As string = "SELECT * FROM " + tableName
@@ -113,8 +156,8 @@ Inherits control
 		    'Try
 		    While Not dbRecordSet.EOF
 		      
-		      ReDim dict( dict.Ubound + 1 )
-		      dict( dict.Ubound ) = new Dictionary
+		      ReDim dataDict( dataDict.Ubound + 1 )
+		      dataDict( dataDict.Ubound ) = new Dictionary
 		      
 		      'For fieldIndex as Integer = 0 to dbRecordSet.FieldCount - 1
 		      For fieldIndex as Integer = 1 to dbRecordSet.FieldCount
@@ -122,7 +165,7 @@ Inherits control
 		        theFieldName = dbRecordSet.IdxField( fieldIndex ).Name.ToText
 		        theFieldValue = dbRecordSet.IdxField( fieldIndex ).StringValue.ToText
 		        
-		        dict( dict.Ubound ).Value( theFieldName ) = theFieldValue
+		        dataDict( dataDict.Ubound ).Value( theFieldName ) = theFieldValue
 		        
 		      Next
 		      
@@ -141,42 +184,22 @@ Inherits control
 	#tag Method, Flags = &h0
 		Sub loadFromDictionary(pDictionary as Dictionary)
 		  // Reset the Dictionary
-		  ReDim dict(-1)
+		  ReDim dataDict(-1)
 		  // Add a row / element
-		  ReDim dict( dict.Ubound + 1 )
-		  dict( dict.Ubound ) = new Dictionary
+		  ReDim dataDict( dataDict.Ubound + 1 )
+		  dataDict( dataDict.Ubound ) = new Dictionary
 		  // Set the Dictionary
-		  dict( dict.Ubound ) = pDictionary
+		  dataDict( dataDict.Ubound ) = pDictionary
 		End Sub
 	#tag EndMethod
 
 
 	#tag Property, Flags = &h0
-		controlFields() As text
+		controlDict() As Dictionary
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
-		controlLabels() As text
-	#tag EndProperty
-
-	#tag Property, Flags = &h0
-		controlNames() As text
-	#tag EndProperty
-
-	#tag Property, Flags = &h0
-		controlsEnable As Boolean = true
-	#tag EndProperty
-
-	#tag Property, Flags = &h0
-		dict() As Dictionary
-	#tag EndProperty
-
-	#tag Property, Flags = &h0
-		listBoxFields() As text
-	#tag EndProperty
-
-	#tag Property, Flags = &h0
-		listBoxHeader() As text
+		dataDict() As Dictionary
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
@@ -193,6 +216,12 @@ Inherits control
 
 
 	#tag ViewBehavior
+		#tag ViewProperty
+			Name="controlsEnable"
+			Group="Behavior"
+			InitialValue="true"
+			Type="Boolean"
+		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Handle"
 			Group="Behavior"

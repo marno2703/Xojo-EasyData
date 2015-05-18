@@ -3,7 +3,7 @@ Xojo EasyData for FileMaker Developers - Making Xojo Database Apps Easier
 
 I come from a background in FileMaker development and I'm also a Xojo developer. I love both platforms but I find that it takes me longer to work with databases in Xojo than it does with FileMaker. This project intends to reduce the time it takes to work with databases in Xojo.
 
-This Desktop app read from a sqlite database file, shows contacts in a window, and shows the details when a contact is clicked.
+This Desktop app reads from a sqlite database file, shows contacts in a window, and shows the details when a contact is clicked.
 
 Overview Video: https://www.youtube.com/watch?v=-aoPkGX7XWQ
 

@@ -48,6 +48,7 @@ Begin Window Window1
       Selectable      =   False
       TabIndex        =   1
       TabPanelIndex   =   0
+      TabStop         =   True
       Text            =   "Contacts List"
       TextAlign       =   0
       TextColor       =   &c00000000
@@ -82,6 +83,7 @@ Begin Window Window1
       Selectable      =   False
       TabIndex        =   3
       TabPanelIndex   =   0
+      TabStop         =   True
       Text            =   "Contacts Detail"
       TextAlign       =   0
       TextColor       =   &c00000000
@@ -116,6 +118,7 @@ Begin Window Window1
       Selectable      =   False
       TabIndex        =   8
       TabPanelIndex   =   0
+      TabStop         =   True
       Text            =   "Company"
       TextAlign       =   0
       TextColor       =   &c00000000
@@ -150,6 +153,7 @@ Begin Window Window1
       Selectable      =   False
       TabIndex        =   10
       TabPanelIndex   =   0
+      TabStop         =   True
       Text            =   "Last Name"
       TextAlign       =   0
       TextColor       =   &c00000000
@@ -184,6 +188,7 @@ Begin Window Window1
       Selectable      =   False
       TabIndex        =   12
       TabPanelIndex   =   0
+      TabStop         =   True
       Text            =   "First Name"
       TextAlign       =   0
       TextColor       =   &c00000000
@@ -197,8 +202,10 @@ Begin Window Window1
       Width           =   74
    End
    Begin edTable edTableContacts
+      controlsEnable  =   True
+      Enabled         =   True
       Handle          =   0
-      Height          =   32
+      Height          =   "32"
       Index           =   -2147483648
       InitialParent   =   ""
       Left            =   0
@@ -207,12 +214,15 @@ Begin Window Window1
       MouseY          =   0
       PanelIndex      =   0
       Scope           =   0
+      TabIndex        =   5
       tableKeyName    =   ""
       tableKeyValue   =   ""
       tableName       =   ""
       TabPanelIndex   =   0
+      TabStop         =   True
       Top             =   0
-      Width           =   32
+      Visible         =   True
+      Width           =   "32"
       Window          =   "0"
       _mIndex         =   0
       _mInitialParent =   ""
@@ -439,8 +449,10 @@ Begin Window Window1
       Width           =   143
    End
    Begin edTable edTableContactsAddresses
+      controlsEnable  =   True
+      Enabled         =   True
       Handle          =   0
-      Height          =   32
+      Height          =   "32"
       Index           =   -2147483648
       InitialParent   =   ""
       Left            =   20
@@ -449,12 +461,15 @@ Begin Window Window1
       MouseY          =   0
       PanelIndex      =   0
       Scope           =   0
+      TabIndex        =   11
       tableKeyName    =   ""
       tableKeyValue   =   ""
       tableName       =   ""
       TabPanelIndex   =   0
+      TabStop         =   True
       Top             =   20
-      Width           =   32
+      Visible         =   True
+      Width           =   "32"
       Window          =   "0"
       _mIndex         =   0
       _mInitialParent =   ""
@@ -463,8 +478,10 @@ Begin Window Window1
       _mWindow        =   "0"
    End
    Begin edTable edTableContactsComms
+      controlsEnable  =   True
+      Enabled         =   True
       Handle          =   0
-      Height          =   32
+      Height          =   "32"
       Index           =   -2147483648
       InitialParent   =   ""
       Left            =   40
@@ -473,12 +490,15 @@ Begin Window Window1
       MouseY          =   0
       PanelIndex      =   0
       Scope           =   0
+      TabIndex        =   12
       tableKeyName    =   ""
       tableKeyValue   =   ""
       tableName       =   ""
       TabPanelIndex   =   0
+      TabStop         =   True
       Top             =   40
-      Width           =   32
+      Visible         =   True
+      Width           =   "32"
       Window          =   "0"
       _mIndex         =   0
       _mInitialParent =   ""
@@ -608,6 +628,7 @@ Begin Window Window1
       Selectable      =   False
       TabIndex        =   20
       TabPanelIndex   =   0
+      TabStop         =   True
       Text            =   "Contacts Addresses"
       TextAlign       =   0
       TextColor       =   &c00000000
@@ -642,6 +663,7 @@ Begin Window Window1
       Selectable      =   False
       TabIndex        =   21
       TabPanelIndex   =   0
+      TabStop         =   True
       Text            =   "Contacts Comms"
       TextAlign       =   0
       TextColor       =   &c00000000
@@ -660,6 +682,7 @@ End
 #tag WindowCode
 	#tag Event
 		Sub Open()
+		  dim theHeaders(), theFields() as text
 		  
 		  // CONTACTS
 		  
@@ -671,16 +694,19 @@ End
 		  // Load the Data
 		  edTableContacts.loadFromDB
 		  
-		  // Register the Controls and their Labels
-		  edTableContacts.controlNames = Array( "UUIDTextField", "CompanyTextField", "NameFirstTextField", "NameLastTextField" )
-		  edTableContacts.controlLabels = Array( "UUIDTextLabel", "CompanyTextLabel", "NameFirstTextLabel", "NameLastTextLabel" )
-		  edTableContacts.controlFields = Array( "UUID", "Company", "NameFirst", "NameLast" )
+		  // Register the Controls ( Name, Field, Label, Enabled )
+		  edTableContacts.controlRegister( "UUIDTextField", "UUID", "", false )
+		  edTableContacts.controlRegister( "CompanyTextField", "Company", "CompanyTextLabel", true )
+		  edTableContacts.controlRegister( "NameFirstTextField", "NameFirst", "NameFirstLabel", true )
+		  edTableContacts.controlRegister( "NameLastTextField", "NameLast", "NameLastLabel", true )
+		  
+		  // Register the Listbox ( Name, Headers, Fields, Enabled )
+		  theHeaders() = Array ( "Company", "First Name", "Last Name" )
+		  theFields() = Array ( "Company", "NameFirst", "NameLast" )
+		  edTableContacts.controlRegisterListbox( "ContactsListbox", theHeaders(), theFields(), true )
 		  
 		  // Populate the Data into the ListBox
-		  edTableContacts.controlsEnable = true // make the controls enabled after being set. Default is true 
-		  edTableContacts.listBoxHeader = Array ( "Company", "First Name", "Last Name" )
-		  edTableContacts.listBoxFields = Array ( "Company", "NameFirst", "NameLast" )
-		  edTableContacts.controlsSet( "ContactsListbox", -2 )  // -2 = all records
+		  edTableContacts.controlSet( "ContactsListbox", -2 )  // -2 = all records
 		End Sub
 	#tag EndEvent
 
@@ -690,9 +716,10 @@ End
 #tag Events ContactsListbox
 	#tag Event
 		Sub Change()
+		  dim theHeaders(), theFields() as text
 		  
-		  edTableContacts.controlsSet( "", me.ListIndex )  // -2 = all records
-		  UUIDTextField.Enabled = false
+		  // Update the Fields
+		  edTableContacts.controlSet( "Controls", me.ListIndex )  // -2 = all records
 		  
 		  // ================================================
 		  
@@ -706,11 +733,13 @@ End
 		  // Load the Data
 		  edTableContactsAddresses.loadFromDB
 		  
+		  // Register the Listbox ( Name, Headers, Fields, Enabled )
+		  theHeaders() = Array ( "Street", "City", "State", "Zip", "County" )
+		  theFields() = Array ( "Street", "City", "State", "Zip", "County" )
+		  edTableContactsAddresses.controlRegisterListbox( "ContactsAddressesListbox", theHeaders(), theFields(), true )
+		  
 		  // Populate the Data into the ListBox
-		  edTableContactsAddresses.controlsEnable = true  // make the controls enabled after being set. Default is true 
-		  edTableContactsAddresses.listBoxHeader = Array ( "Street", "City", "State", "Zip", "County" )
-		  edTableContactsAddresses.listBoxFields = Array ( "Street", "City", "State", "Zip", "County" )
-		  edTableContactsAddresses.controlsSet( "ContactsAddressesListbox", -2 )  // -2 = all records
+		  edTableContactsAddresses.controlSet( "ContactsAddressesListbox", -2 )  // -2 = all records
 		  
 		  // ================================================
 		  
@@ -724,11 +753,15 @@ End
 		  // Load the Data
 		  edTableContactsComms.loadFromDB
 		  
+		  
+		  // Register the Listbox ( Name, Headers, Fields, Enabled )
+		  theHeaders() = Array ( "Type", "Data" )
+		  theFields() = Array ( "Type", "Data" )
+		  edTableContactsComms.controlRegisterListbox( "ContactsCommsListbox", theHeaders(), theFields(), true )
+		  
 		  // Populate the Data into the ListBox
-		  edTableContactsComms.controlsEnable = true  // make the controls enabled after being set. Default is true 
-		  edTableContactsComms.listBoxHeader = Array ( "Type", "Data" )
-		  edTableContactsComms.listBoxFields = Array ( "Type", "Data" )
-		  edTableContactsComms.controlsSet( "ContactsCommsListbox", -2 )  // -2 = all records
+		  edTableContactsComms.controlSet( "ContactsCommsListbox", -2 )  // -2 = all records
+		  
 		End Sub
 	#tag EndEvent
 #tag EndEvents
