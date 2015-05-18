@@ -217,12 +217,6 @@ Inherits control
 
 	#tag ViewBehavior
 		#tag ViewProperty
-			Name="controlsEnable"
-			Group="Behavior"
-			InitialValue="true"
-			Type="Boolean"
-		#tag EndViewProperty
-		#tag ViewProperty
 			Name="Handle"
 			Group="Behavior"
 			InitialValue="0"

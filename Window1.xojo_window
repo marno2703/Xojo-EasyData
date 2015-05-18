@@ -202,7 +202,7 @@ Begin Window Window1
       Width           =   74
    End
    Begin edTable edTableContacts
-      controlsEnable  =   True
+      controlsEnable  =   "True"
       Enabled         =   True
       Handle          =   0
       Height          =   "32"
@@ -214,7 +214,7 @@ Begin Window Window1
       MouseY          =   0
       PanelIndex      =   0
       Scope           =   0
-      TabIndex        =   5
+      TabIndex        =   "5"
       tableKeyName    =   ""
       tableKeyValue   =   ""
       tableName       =   ""
@@ -449,7 +449,7 @@ Begin Window Window1
       Width           =   143
    End
    Begin edTable edTableContactsAddresses
-      controlsEnable  =   True
+      controlsEnable  =   "True"
       Enabled         =   True
       Handle          =   0
       Height          =   "32"
@@ -461,7 +461,7 @@ Begin Window Window1
       MouseY          =   0
       PanelIndex      =   0
       Scope           =   0
-      TabIndex        =   11
+      TabIndex        =   "11"
       tableKeyName    =   ""
       tableKeyValue   =   ""
       tableName       =   ""
@@ -478,7 +478,7 @@ Begin Window Window1
       _mWindow        =   "0"
    End
    Begin edTable edTableContactsComms
-      controlsEnable  =   True
+      controlsEnable  =   "True"
       Enabled         =   True
       Handle          =   0
       Height          =   "32"
@@ -490,7 +490,7 @@ Begin Window Window1
       MouseY          =   0
       PanelIndex      =   0
       Scope           =   0
-      TabIndex        =   12
+      TabIndex        =   "12"
       tableKeyName    =   ""
       tableKeyValue   =   ""
       tableName       =   ""
@@ -682,7 +682,7 @@ End
 #tag WindowCode
 	#tag Event
 		Sub Open()
-		  dim theHeaders(), theFields() as text
+		  dim theListboxHeaders(), theListboxFields() as text
 		  
 		  // CONTACTS
 		  
@@ -691,7 +691,7 @@ End
 		  edTableContacts.tableKeyName = "UUID"
 		  edTableContacts.tableKeyValue = ""
 		  
-		  // Load the Data
+		  // Load the Data using the DB Table Info. Will be: 'SELECT * from Contacts'.
 		  edTableContacts.loadFromDB
 		  
 		  // Register the Controls ( Name, Field, Label, Enabled )
@@ -700,10 +700,10 @@ End
 		  edTableContacts.controlRegister( "NameFirstTextField", "NameFirst", "NameFirstLabel", true )
 		  edTableContacts.controlRegister( "NameLastTextField", "NameLast", "NameLastLabel", true )
 		  
-		  // Register the Listbox ( Name, Headers, Fields, Enabled )
-		  theHeaders() = Array ( "Company", "First Name", "Last Name" )
-		  theFields() = Array ( "Company", "NameFirst", "NameLast" )
-		  edTableContacts.controlRegisterListbox( "ContactsListbox", theHeaders(), theFields(), true )
+		  // Register the Listbox ( Name, Headers, Fields, Enabled ) The Headers and Fields are just arrays of text. 
+		  theListboxHeaders() = Array ( "Company", "First Name", "Last Name" )
+		  theListboxFields() = Array ( "Company", "NameFirst", "NameLast" )
+		  edTableContacts.controlRegisterListbox( "ContactsListbox", theListboxHeaders(), theListboxFields(), true )
 		  
 		  // Populate the Data into the ListBox
 		  edTableContacts.controlSet( "ContactsListbox", -2 )  // -2 = all records
@@ -716,7 +716,7 @@ End
 #tag Events ContactsListbox
 	#tag Event
 		Sub Change()
-		  dim theHeaders(), theFields() as text
+		  dim theListboxHeaders(), theListboxFields() as text
 		  
 		  // Update the Fields
 		  edTableContacts.controlSet( "Controls", me.ListIndex )  // -2 = all records
@@ -728,15 +728,15 @@ End
 		  // Assign the DB Table Info
 		  edTableContactsAddresses.tableName = "ContactsAddresses"
 		  edTableContactsAddresses.tableKeyName = "UUIDContact"
-		  edTableContactsAddresses.tableKeyValue = UUIDTextField.text.ToText
+		  edTableContactsAddresses.tableKeyValue = UUIDTextField.text.ToText  // This field will have the key field of the contact in it.
 		  
-		  // Load the Data
+		  // Load the Data using the DB Table Info. Will be: SELECT * FROM ContactsAddresses WHERE UUIDContact = 'xxx', but xxx will be the value of the UUIDTextField 
 		  edTableContactsAddresses.loadFromDB
 		  
-		  // Register the Listbox ( Name, Headers, Fields, Enabled )
-		  theHeaders() = Array ( "Street", "City", "State", "Zip", "County" )
-		  theFields() = Array ( "Street", "City", "State", "Zip", "County" )
-		  edTableContactsAddresses.controlRegisterListbox( "ContactsAddressesListbox", theHeaders(), theFields(), true )
+		  // Register the Listbox ( Name, Headers, Fields, Enabled ) The Headers and Fields are just arrays of text. 
+		  theListboxHeaders() = Array ( "Street", "City", "State", "Zip", "County" )
+		  theListboxFields() = Array ( "Street", "City", "State", "Zip", "County" )
+		  edTableContactsAddresses.controlRegisterListbox( "ContactsAddressesListbox", theListboxHeaders(), theListboxFields(), true )
 		  
 		  // Populate the Data into the ListBox
 		  edTableContactsAddresses.controlSet( "ContactsAddressesListbox", -2 )  // -2 = all records
@@ -748,16 +748,16 @@ End
 		  // Assign the DB Table Info
 		  edTableContactsComms.tableName = "ContactsComms"
 		  edTableContactsComms.tableKeyName = "UUIDContact"
-		  edTableContactsComms.tableKeyValue = UUIDTextField.text.ToText
+		  edTableContactsComms.tableKeyValue = UUIDTextField.text.ToText  // This field will have the key field of the contact in it.
 		  
-		  // Load the Data
+		  // Load the Data using the DB Table Info. Will be: SELECT * FROM ContactsComms WHERE UUIDContact = 'xxx', but xxx will be the value of the UUIDTextField 
 		  edTableContactsComms.loadFromDB
 		  
 		  
-		  // Register the Listbox ( Name, Headers, Fields, Enabled )
-		  theHeaders() = Array ( "Type", "Data" )
-		  theFields() = Array ( "Type", "Data" )
-		  edTableContactsComms.controlRegisterListbox( "ContactsCommsListbox", theHeaders(), theFields(), true )
+		  // Register the Listbox ( Name, Headers, Fields, Enabled ) The Headers and Fields are just arrays of text. 
+		  theListboxHeaders() = Array ( "Type", "Data" )
+		  theListboxFields() = Array ( "Type", "Data" )
+		  edTableContactsComms.controlRegisterListbox( "ContactsCommsListbox", theListboxHeaders(), theListboxFields(), true )
 		  
 		  // Populate the Data into the ListBox
 		  edTableContactsComms.controlSet( "ContactsCommsListbox", -2 )  // -2 = all records
