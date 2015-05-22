@@ -6,7 +6,7 @@ Inherits control
 		  ReDim controlDict( controlDict.Ubound + 1 )
 		  controlDict( controlDict.Ubound ) = new Dictionary
 		  
-		  controlDict( controlDict.Ubound ).Value( "Type" ) = "Control"
+		  controlDict( controlDict.Ubound ).Value( "Type" ) = "Controls"
 		  controlDict( controlDict.Ubound ).Value( "Name" ) = pName
 		  controlDict( controlDict.Ubound ).Value( "Field" ) = pField
 		  controlDict( controlDict.Ubound ).Value( "Label" ) = pLabel
@@ -28,85 +28,11 @@ Inherits control
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub controlSave(pControlName as text, pTableKeyValue as text, pControlValue as text)
-		  dim theControlDictElement, theDataDictElement as Integer
-		  dim theControlFieldName as text
+		Sub controlSave(pControlName as text)
+		  // update dataDict
+		  // update list boxes and controls
+		  // update db
 		  
-		  dim theArray() as text
-		  dim theArrayIndex as integer
-		  dim theControl as Control
-		  dim theListboxRowCount as integer
-		  
-		  // =========================================
-		  
-		  // Update dataDict
-		  theControlDictElement = findControlDictElementByName( pControlName )
-		  theDataDictElement = findDataDictElementByKey( pTableKeyValue )
-		  theControlFieldName = controlDict( theControlDictElement ).Value( "Field" )
-		  
-		  // Update the Value if it is different.
-		  if dataDict( theDataDictElement ).Value( theControlFieldName ) <> pControlValue then
-		    dataDict( theDataDictElement ).Value( theControlFieldName ) = pControlValue
-		  end if
-		  
-		  // =========================================
-		  
-		  // Update the values in the controls
-		  For theControlDictIndex as Integer = 0 to controlDict.Ubound
-		    
-		    // Update the Controls with the same Field
-		    if controlDict( theControlDictIndex).Value( "Type" ) = "Control" then
-		      if controlDict( theControlDictIndex ).Value( "Field" ) = theControlFieldName then
-		        theControl = me.Window.Control( findControlByName ( controlDict( theControlDictIndex ).Value( "Name" ) ) )
-		        
-		        // UPDATE THE TEXTFIELD if needed.
-		        if theControl IsA TextField then
-		          if TextField( theControl ).Text <> pControlValue then
-		            TextField( theControl ).Text = pControlValue
-		          end if
-		        end if
-		        
-		      end if
-		    end if
-		    
-		    // Update the Listboxes that have the Control's Field as a Column
-		    if controlDict( theControlDictIndex ).Value( "Type" ) = "Listbox" then
-		      theArray = controlDict( theControlDictIndex ).Value( "Fields" )  // Get the Field Names
-		      theArrayIndex = theArray.IndexOf( theControlFieldName )  // Get the Field Index
-		      if theArrayIndex > -1 then  // We have a column for theat field!
-		        theControl = me.Window.Control( findControlByName ( controlDict( theControlDictIndex ).Value( "Name" ) ) )
-		        
-		        // FIND THE ROWTAG with our pTableKeyValue and UPDATE if needed.
-		        theListboxRowCount = ListBox( theControl ).ListCount - 1
-		        for theRow as Integer = 0 to theListboxRowCount
-		          if ListBox( theControl ).RowTag( theRow ) = pTableKeyValue then
-		            if ListBox( theControl ).Cell( theRow, theArrayIndex ) <> pControlValue then
-		              ListBox( theControl ).Cell( theRow, theArrayIndex ) = pControlValue
-		            end if
-		          end if
-		        next
-		        
-		      end if
-		    end if
-		    
-		  next
-		  
-		  // =========================================
-		  
-		  // Update the Database
-		  // Select the Records
-		  sql = "SELECT * FROM " + tableName + " WHERE " + tableKeyName + " = " + chr( 39 ).ToText + pTableKeyValue + chr( 39 ).ToText
-		  Dim dbRecordSet As RecordSet
-		  dbRecordSet = app.db.SQLSelect(sql)
-		  if app.db.Error then
-		    app.MsgBoxAlert( "Alert", "Database Exception: " + app.db.ErrorCode.ToText + "/" + app.db.ErrorMessage.ToText, "OK" )
-		  end if
-		  dbRecordSet.Edit
-		  dbRecordSet.Field( theControlFieldName ).Value = pControlValue
-		  dbRecordSet.Update
-		  if app.db.Error then
-		    app.MsgBoxAlert( "Alert", "Database Exception: " + app.db.ErrorCode.ToText + "/" + app.db.ErrorMessage.ToText, "OK" )
-		  end if
 		End Sub
 	#tag EndMethod
 
@@ -135,7 +61,7 @@ Inherits control
 		      // Clear the ListBox
 		      ListBox( theControl ).DeleteAllRows
 		      
-		      theControlDictElement = findControlDictElementByName( pControlName )
+		      theControlDictElement = findControlDictElement( pControlName )
 		      
 		      // Set the Number of Columns in the ListBox
 		      theListboxHeaders() = controlDict( theControlDictElement ).Value( "Headers" )
@@ -169,8 +95,8 @@ Inherits control
 		    // =========================================
 		    
 		    // Populate our Controls
-		    theControlDictElement = findControlDictElementByName( theControlName )
-		    if pControlName = "Control" and theControlDictElement > -1 then
+		    theControlDictElement = findControlDictElement( theControlName )
+		    if pControlName = "Controls" and theControlDictElement > -1 then
 		      
 		      // TextFields
 		      if theControl IsA TextField then
@@ -187,45 +113,12 @@ Inherits control
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function findControlByName(pControlName as text) As integer
+		Function findControlDictElement(pControlName as text) As integer
 		  
-		  // Look thru each Control for the Name of the Control
-		  Dim theControl As Control
-		  For i As Integer = 0 To me.Window.ControlCount-1
-		    theControl = me.Window.Control( i )
-		    
-		    if theControl.Name = pControlName then
-		      return i
-		    end if
-		    
-		  Next
 		  
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function findControlDictElementByName(pControlName as text) As integer
-		  
-		  // Look thru each Control for the Name of the Control
 		  For theIndex as Integer = 0 to controlDict.Ubound
 		    
 		    if controlDict( theIndex).Value( "Name" ) = pControlName then
-		      return theIndex
-		    end if
-		    
-		  next
-		  
-		  return -1
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function findDataDictElementByKey(pTableKeyValue as text) As integer
-		  
-		  // Look thru each Data Element for the KeyValue
-		  For theIndex as Integer = 0 to dataDict.Ubound
-		    
-		    if dataDict( theIndex).Value( tableKeyName ) = pTableKeyValue then
 		      return theIndex
 		    end if
 		    
@@ -241,7 +134,7 @@ Inherits control
 		  ReDim dataDict(-1)
 		  
 		  // Select the Records
-		  sql = "SELECT * FROM " + tableName
+		  Dim sql As string = "SELECT * FROM " + tableName
 		  
 		  if tableKeyName <> "" and tableKeyValue <> "" then
 		    sql = sql + " WHERE " + tableKeyName + " = " + chr( 39 ).ToText + tableKeyValue + chr( 39 ).ToText
@@ -259,7 +152,7 @@ Inherits control
 		  Dim dbRecordSet As RecordSet
 		  dbRecordSet = app.db.SQLSelect(sql)
 		  if app.db.Error then
-		    app.MsgBoxAlert( "Alert", "Database Exception: " + app.db.ErrorCode.ToText + "/" + app.db.ErrorMessage.ToText, "OK" )
+		    app.MsgBoxAlert_2015( "Alert", "Database Exception: " + app.db.ErrorCode.ToText + "/" + app.db.ErrorMessage.ToText, "OK" )
 		  end if
 		  
 		  //===================================
@@ -316,10 +209,6 @@ Inherits control
 
 	#tag Property, Flags = &h0
 		dataDict() As Dictionary
-	#tag EndProperty
-
-	#tag Property, Flags = &h0
-		sql As text
 	#tag EndProperty
 
 	#tag Property, Flags = &h0

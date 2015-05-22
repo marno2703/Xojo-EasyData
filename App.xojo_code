@@ -51,13 +51,13 @@ Inherits Application
 		    End If
 		    
 		  Else
-		    app.MsgBoxAlert_2015( "Alert", "Unable to Locate the Database. Expected Database Path: " + dbFile.NativePath.ToText, "OK" )
+		    app.MsgBoxAlert( "Alert", "Unable to Locate the Database. Expected Database Path: " + dbFile.NativePath.ToText, "OK" )
 		  End If
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub MsgBoxAlert_2015(theTitle as text, theMessage as text, button1Text as text)
+		Sub MsgBoxAlert(theTitle as text, theMessage as text, button1Text as text)
 		  #IF TargetDesktop OR TargetWeb OR TargetConsole THEN
 		    
 		    MsgBox ( theTitle + ": " + theMessage )
