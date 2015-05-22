@@ -15,6 +15,7 @@ Once you open the project look at these first:
 - On Window1, look at the listboxes and textfields.
 - In the Window1 Open Event Handler look at the code to register the textboxes and the ContactsListbox and sets the values to the ContactsListbox. This fires when the Window1 opens.
 - In the ContactsListbox, look at the Change Event Handler. This sets the values to the textfields, registers and set the ContactsAddressesListbox, and registers and set the ContactsCommsListbox.
+- Editing a value in a TextField will look thru the registered controls and listboxes for any TextFields and Listboxes with a column that uses the same database field and update its value. Finally, it saves the value to the database.
 
 At first it may seem complex, but when you break it down, it's very simple and can be used over and over again.
 
