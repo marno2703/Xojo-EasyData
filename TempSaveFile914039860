@@ -396,7 +396,7 @@ Begin Window Window1
       Visible         =   True
       Width           =   214
    End
-   Begin TextField ContactUUIDTextField
+   Begin TextField UUIDTextField
       AcceptTabs      =   False
       Alignment       =   0
       AutoDeactivate  =   True
@@ -673,7 +673,7 @@ End
 		  edTableContacts.loadFromDB
 		  
 		  // Register the Controls ( Name, Field, Label, Enabled )
-		  edTableContacts.controlRegister( "ContactUUIDTextField", "UUID", "", false )
+		  edTableContacts.controlRegister( "UUIDTextField", "UUID", "", false )
 		  edTableContacts.controlRegister( "CompanyTextField", "Company", "CompanyLabel", true )
 		  edTableContacts.controlRegister( "NameFirstTextField", "NameFirst", "NameFirstLabel", true )
 		  edTableContacts.controlRegister( "NameLastTextField", "NameLast", "NameLastLabel", true )
@@ -695,12 +695,9 @@ End
 	#tag Event
 		Sub Change()
 		  dim theListboxHeaders(), theListboxFields() as text
-		  dim theTableNameKeyValue as text
 		  
-		  // Get the Primary Key
-		  theTableNameKeyValue = me.RowTag( me.ListIndex )
 		  // Update the Fields
-		  edTableContacts.controlSet( "Control", me.ListIndex )  // -2 = all records
+		  edTableContacts.controlSet( "Controls", me.ListIndex )  // -2 = all records
 		  
 		  // ================================================
 		  
@@ -709,7 +706,7 @@ End
 		  // Assign the DB Table Info
 		  edTableContactsAddresses.tableName = "ContactsAddresses"
 		  edTableContactsAddresses.tableKeyName = "UUIDContact"
-		  edTableContactsAddresses.tableKeyValue = theTableNameKeyValue  // The key of the contact.
+		  edTableContactsAddresses.tableKeyValue = UUIDTextField.text.ToText  // This field will have the key field of the contact in it.
 		  
 		  // Load the Data using the DB Table Info. Will be: SELECT * FROM ContactsAddresses WHERE UUIDContact = 'xxx', but xxx will be the value of the UUIDTextField
 		  edTableContactsAddresses.loadFromDB
@@ -729,7 +726,7 @@ End
 		  // Assign the DB Table Info
 		  edTableContactsComms.tableName = "ContactsComms"
 		  edTableContactsComms.tableKeyName = "UUIDContact"
-		  edTableContactsComms.tableKeyValue = theTableNameKeyValue  // The key of the contact.
+		  edTableContactsComms.tableKeyValue = UUIDTextField.text.ToText  // This field will have the key field of the contact in it.
 		  
 		  // Load the Data using the DB Table Info. Will be: SELECT * FROM ContactsComms WHERE UUIDContact = 'xxx', but xxx will be the value of the UUIDTextField
 		  edTableContactsComms.loadFromDB
@@ -749,21 +746,7 @@ End
 #tag Events CompanyTextField
 	#tag Event
 		Sub LostFocus()
-		  edTableContacts.controlSave( me.Name.ToText, ContactUUIDTextField.Text.ToText, me.Text.ToText )
-		End Sub
-	#tag EndEvent
-#tag EndEvents
-#tag Events NameFirstTextField
-	#tag Event
-		Sub LostFocus()
-		  edTableContacts.controlSave( me.Name.ToText, ContactUUIDTextField.Text.ToText, me.Text.ToText )
-		End Sub
-	#tag EndEvent
-#tag EndEvents
-#tag Events NameLastTextField
-	#tag Event
-		Sub LostFocus()
-		  edTableContacts.controlSave( me.Name.ToText, ContactUUIDTextField.Text.ToText, me.Text.ToText )
+		  
 		End Sub
 	#tag EndEvent
 #tag EndEvents
