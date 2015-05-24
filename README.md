@@ -30,14 +30,18 @@ Xojo is free to use for an unlimited amount of time. You only need to purchase i
 Methods
 - controlRegister: Registers a simple control, like a TextField, with the edTable.
 - controlRegisterListbox: Registers a Listbox with the edTable.
+- controlSave: Changes to a control updates the registered controls with the same data fieldname as well as any registered Listboxes with a column with the same data fieldname.
 - controlSet: Sets the values from the dataDict() to the named Listbox or the simple controls.
-- findControlDictElement: Returns the index of the dataDict() for a specific control.
+- findControlByName: Returns the index of a Window.Control.
+- findControlDictElementByName: Returns the index of the controlDict() for a specific control.
+- findDataDictElementByKey: Returns the index of the dataDict() based on the value of the tableKeyName's value.
 - loadFromDB: Loads data from a database table into the dataDict().
 - loadFromDictionary: Not used yet, but could be used to pass an existing dictionary to set the dataDict().
 
 Properties
 - controlDict(): Stores an array of controls that the edTable should manage.
 - dataDict(): Stores the data as an array of dictionaries. Each field name is the key and the field value as the value.
+- sql: Stores the sql command text.
 - tableKeyName: The table's key field name.
 - tableKeyValue: The value used to query using the table's key field.
 - tableName: The name of the table.
