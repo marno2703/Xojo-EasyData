@@ -3,6 +3,8 @@ Protected Class edTable
 Inherits control
 	#tag Method, Flags = &h0
 		Sub controlRegister(pName as text, pField as text, pLabel as text, pEnable as Boolean)
+		  
+		  // Register a Control
 		  ReDim controlDict( controlDict.Ubound + 1 )
 		  controlDict( controlDict.Ubound ) = new Dictionary
 		  
@@ -16,6 +18,8 @@ Inherits control
 
 	#tag Method, Flags = &h0
 		Sub controlRegisterListbox(pName as text, pHeader() as text, pFields() as text, pEnable as Boolean)
+		  
+		  // Register a Listbox
 		  ReDim controlDict( controlDict.Ubound + 1 )
 		  controlDict( controlDict.Ubound ) = new Dictionary
 		  
@@ -24,6 +28,56 @@ Inherits control
 		  controlDict( controlDict.Ubound ).Value( "Headers" ) = pHeader()
 		  controlDict( controlDict.Ubound ).Value( "Fields" ) = pFields()
 		  controlDict( controlDict.Ubound ).Value( "Enable" ) = pEnable
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub controlRegisterListboxActions(pName as text, pActionPopupName as text, pActionTextFieldName as text, pActionsTypes() as text, pIncludeColumnsAll as boolean, pColumns() as text, pFields() as text)
+		  
+		  // Register the Actions
+		  ReDim controlDict( controlDict.Ubound + 1 )
+		  controlDict( controlDict.Ubound ) = new Dictionary
+		  
+		  controlDict( controlDict.Ubound ).Value( "Type" ) = "Actions"
+		  controlDict( controlDict.Ubound ).Value( "ControlName" ) = pName
+		  controlDict( controlDict.Ubound ).Value( "PopupName" ) = pActionPopupName
+		  controlDict( controlDict.Ubound ).Value( "TextFieldName" ) = pActionTextFieldName
+		  controlDict( controlDict.Ubound ).Value( "ActionTypes" ) = pActionsTypes()
+		  controlDict( controlDict.Ubound ).Value( "IncludeColumnsAll" ) = pIncludeColumnsAll
+		  controlDict( controlDict.Ubound ).Value( "Columns" ) = pColumns()
+		  controlDict( controlDict.Ubound ).Value( "Fields" ) = pFields()
+		  
+		  // Get the Popup Menu Control
+		  dim theActionPopupControlIndex as Integer
+		  dim theActionPopupControl as control
+		  theActionPopupControlIndex = findControlByName( pActionPopupName )
+		  theActionPopupControl = me.Window.Control( theActionPopupControlIndex )
+		  
+		  //Set the Popup Menu Control
+		  if theActionPopupControl isa PopupMenu then
+		    PopupMenu( theActionPopupControl ).DeleteAllRows
+		    For theActionsTypesIndex as Integer = 0 to pActionsTypes.Ubound
+		      
+		      // Add the All Item
+		      if pIncludeColumnsAll then
+		        PopupMenu( theActionPopupControl ).AddRow( pActionsTypes( theActionsTypesIndex ) + " " + "All" )
+		        PopupMenu( theActionPopupControl ).RowTag( PopupMenu( theActionPopupControl ).ListCount - 1 ) = pActionsTypes( theActionsTypesIndex ) + "-" + text.Join( pFields, "," )
+		      end if
+		      // Add each Column
+		      For theActionsColumnsIndex as Integer = 0 to pColumns.Ubound
+		        PopupMenu( theActionPopupControl ).AddRow( pActionsTypes( theActionsTypesIndex ) + " " + pColumns( theActionsColumnsIndex ) )
+		        PopupMenu( theActionPopupControl ).RowTag( PopupMenu( theActionPopupControl ).ListCount - 1 ) = pActionsTypes( theActionsTypesIndex ) + "-" + pFields( theActionsColumnsIndex )
+		      next
+		      // Add a Separator
+		      if theActionsTypesIndex <> pActionsTypes.Ubound then
+		        PopupMenu( theActionPopupControl ).AddSeparator
+		      end if
+		      
+		    next
+		    
+		    //PopupMenu( theActionPopupControl ).ListIndex = 0
+		    
+		  end if
 		End Sub
 	#tag EndMethod
 
@@ -111,7 +165,7 @@ Inherits control
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub controlSet(pControlName as text, pRow as Integer)
+		Sub controlSet(pControlName as text, pRow as Integer, pFilterText as text, pFilterColumns() as string)
 		  
 		  // Set the Controls if there is a Dictionary Entry
 		  dim theControl as Control
@@ -121,7 +175,7 @@ Inherits control
 		  dim theControlDictElement as Integer
 		  dim theListboxHeaders(), theListboxFields() as text
 		  
-		  dim tempText as text
+		  dim addRow as Boolean
 		  
 		  // Look at each Control in the Container
 		  For controlIndex = 0 To me.Window.ControlCount - 1
@@ -142,24 +196,38 @@ Inherits control
 		      theListboxFields() = controlDict( theControlDictElement ).Value( "Fields" )
 		      ListBox( theControl ).ColumnCount = theListboxHeaders.Ubound + 1
 		      
+		      //--------- Set the Header
+		      ListBox( theControl ).heading( -1 ) = ""
+		      For theHeaderNamesIndex as Integer = 0 to theListboxHeaders.Ubound
+		        ListBox( theControl ).heading( theHeaderNamesIndex ) = theListboxHeaders( theHeaderNamesIndex )
+		      Next
+		      //---------
+		      
 		      // For Each Dictionary Array Element / Record
 		      For theDictIndex as Integer = 0 to dataDict.Ubound
-		        ListBox( theControl ).AddRow()
-		        
-		        //--------- Set the Header
-		        ListBox( theControl ).heading( -1 ) = ""
-		        For theHeaderNamesIndex as Integer = 0 to theListboxHeaders.Ubound
-		          ListBox( theControl ).heading( theHeaderNamesIndex ) = theListboxHeaders( theHeaderNamesIndex )
-		        Next
-		        //---------
-		        
-		        //--------- Set the ListBox Rows
-		        ListBox( theControl ).RowTag( ListBox( theControl ).LastIndex ) = dataDict( theDictIndex ).Value( tableKeyName )
-		        For theFieldNamesIndex as Integer = 0 to theListboxFields.Ubound
-		          ListBox( theControl ).Cell( ListBox( theControl ).LastIndex, theFieldNamesIndex ) = dataDict( theDictIndex ).Value( theListboxFields( theFieldNamesIndex ) )
-		        Next
-		        //---------
-		        
+		        if pFilterText <> "" and pFilterColumns.Ubound > -1 then
+		          addRow = false // assume that we are not adding the row
+		          For theFieldNamesIndex as Integer = 0 to theListboxFields.Ubound
+		            // if this is a column we care about and the filter matches, add the row
+		            if pFilterColumns.IndexOf( theListboxFields( theFieldNamesIndex ) ) > -1 and dataDict( theDictIndex ).Value( theListboxFields( theFieldNamesIndex ) ).StringValue.InStr( pFilterText ) > 0 then
+		              addRow = true
+		            end if
+		          Next
+		        else
+		          // Add the Row if there is no filter
+		          addRow = true
+		        end if
+		        // Add the Row if allowed
+		        if addRow then
+		          ListBox( theControl ).AddRow()
+		          
+		          //--------- Set the ListBox Rows
+		          ListBox( theControl ).RowTag( ListBox( theControl ).LastIndex ) = dataDict( theDictIndex ).Value( tableKeyName )
+		          For theFieldNamesIndex as Integer = 0 to theListboxFields.Ubound
+		            ListBox( theControl ).Cell( ListBox( theControl ).LastIndex, theFieldNamesIndex ) = dataDict( theDictIndex ).Value( theListboxFields( theFieldNamesIndex ) )
+		          Next
+		          //---------
+		        end if
 		      Next
 		      
 		      ListBox( theControl ).Enabled = controlDict( theControlDictElement ).Value( "Enable" )
@@ -187,6 +255,89 @@ Inherits control
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Sub filterfindListbox()
+		  
+		  dim theActionPopupName, theActionTextFieldName as text
+		  dim theActionPopupControl, theActionTextFieldControl as control
+		  
+		  dim theActionPopupValue, theActionTextBox as text
+		  dim theActionValues() as string
+		  dim theActionName as text
+		  dim theColumnNames() as string
+		  dim sqlComparisonOperator as text
+		  
+		  sql = ""
+		  
+		  // Get the Controls
+		  theActionPopupName = controlDict( controlDict.Ubound ).Value( "PopupName" )
+		  theActionTextFieldName = controlDict( controlDict.Ubound ).Value( "TextFieldName" )
+		  theActionPopupControl = me.Window.Control( findControlByName( theActionPopupName ) )
+		  theActionTextFieldControl = me.Window.Control( findControlByName( theActionTextFieldName ) )
+		  
+		  // Return if no Action is Selected
+		  if PopupMenu( theActionPopupControl ).ListIndex = -1 then Return
+		  // Return if the RowTag is Nil, but it's not possble to choose a Separator Row
+		  if PopupMenu( theActionPopupControl ).RowTag( PopupMenu( theActionPopupControl ).ListIndex ) = nil then return
+		  
+		  // Get the ActionPopup value
+		  theActionPopupValue = PopupMenu( theActionPopupControl ).RowTag( PopupMenu( theActionPopupControl ).ListIndex )
+		  theActionValues = Split( theActionPopupValue, "-" )
+		  theActionName = theActionValues( 0 ).ToText
+		  theColumnNames = Split( theActionValues( 1 ).ToText, "," )
+		  
+		  // Get the ActionTextBox value
+		  theActionTextBox = "%" + TextField( theActionTextFieldControl ).Text.ToText + "%"
+		  
+		  // ============================================
+		  
+		  if theActionName = "Filter By" then
+		    
+		    // Update the Update the Listbox with the db if the ActionTextBox is empty
+		    controlSet( "ContactsListbox", -2, theActionTextBox, theColumnNames )  // -2 = all records
+		    
+		    'MsgBox "Filtered: " + theActionTextBox
+		    
+		  end if
+		  
+		  // ============================================
+		  
+		  if theActionName = "Find By" then
+		    
+		    // Select the Records
+		    sql = "SELECT * FROM " + tableName
+		    
+		    '// if we have a '%' in the search term, use like otherwise equal
+		    'if theActionTextBox.IndexOf( "%" ) = -1 then
+		    'sqlComparisonOperator = "="
+		    'Else
+		    sqlComparisonOperator = "LIKE"
+		    'end if
+		    // if we have columns, add  the where
+		    if theColumnNames.Ubound > -1 then
+		      sql = sql + " WHERE "
+		    end if
+		    // add the column wit hthe comparion term
+		    For theColumnNameIndex as Integer = 0 to theColumnNames.Ubound
+		      sql = sql + theColumnNames( theColumnNameIndex ).ToText + " " + sqlComparisonOperator + " " + chr( 39 ).ToText + theActionTextBox + chr( 39 ).ToText
+		      // add an OR if not on the last columname
+		      if theColumnNameIndex <> theColumnNames.Ubound then
+		        sql = sql + " OR "
+		      end if
+		    next
+		    
+		    loadFromDB( sql )
+		    controlSet( "ContactsListbox", -2, "", nil )  // -2 = all records
+		    
+		    'MsgBox "Query: " + sql
+		    
+		  end if
+		  
+		  // ============================================
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function findControlByName(pControlName as text) As integer
 		  
 		  // Look thru each Control for the Name of the Control
@@ -209,8 +360,10 @@ Inherits control
 		  // Look thru each Control for the Name of the Control
 		  For theIndex as Integer = 0 to controlDict.Ubound
 		    
-		    if controlDict( theIndex).Value( "Name" ) = pControlName then
-		      return theIndex
+		    if controlDict( theIndex).HasKey( "Name" ) then
+		      if controlDict( theIndex).Value( "Name" ) = pControlName then
+		        return theIndex
+		      end if
 		    end if
 		    
 		  next
@@ -236,15 +389,23 @@ Inherits control
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub loadFromDB()
+		Sub loadFromDB(pSQL as text)
 		  // Reset the Dictionary
 		  ReDim dataDict(-1)
 		  
-		  // Select the Records
-		  sql = "SELECT * FROM " + tableName
-		  
-		  if tableKeyName <> "" and tableKeyValue <> "" then
-		    sql = sql + " WHERE " + tableKeyName + " = " + chr( 39 ).ToText + tableKeyValue + chr( 39 ).ToText
+		  if pSQL = "" then
+		    
+		    // Select the Records
+		    sql = "SELECT * FROM " + tableName
+		    
+		    if tableKeyName <> "" and tableKeyValue <> "" then
+		      sql = sql + " WHERE " + tableKeyName + " = " + chr( 39 ).ToText + tableKeyValue + chr( 39 ).ToText
+		    end if
+		    
+		  else
+		    
+		    sql = pSql
+		    
 		  end if
 		  
 		  //===================================
@@ -379,6 +540,11 @@ Inherits control
 			Group="Behavior"
 			InitialValue="0"
 			Type="Integer"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="sql"
+			Group="Behavior"
+			Type="text"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Super"

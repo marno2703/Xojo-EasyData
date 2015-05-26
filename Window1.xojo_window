@@ -207,6 +207,7 @@ Begin Window Window1
       MouseY          =   0
       PanelIndex      =   0
       Scope           =   0
+      sql             =   ""
       tableKeyName    =   ""
       tableKeyValue   =   ""
       tableName       =   ""
@@ -449,6 +450,7 @@ Begin Window Window1
       MouseY          =   0
       PanelIndex      =   0
       Scope           =   0
+      sql             =   ""
       tableKeyName    =   ""
       tableKeyValue   =   ""
       tableName       =   ""
@@ -473,6 +475,7 @@ Begin Window Window1
       MouseY          =   0
       PanelIndex      =   0
       Scope           =   0
+      sql             =   ""
       tableKeyName    =   ""
       tableKeyValue   =   ""
       tableName       =   ""
@@ -654,13 +657,92 @@ Begin Window Window1
       Visible         =   True
       Width           =   161
    End
+   Begin TextField ContactsListBoxActionTextField
+      AcceptTabs      =   False
+      Alignment       =   0
+      AutoDeactivate  =   True
+      AutomaticallyCheckSpelling=   False
+      BackColor       =   &cFFFFFF00
+      Bold            =   False
+      Border          =   True
+      CueText         =   ""
+      DataField       =   ""
+      DataSource      =   ""
+      Enabled         =   True
+      Format          =   ""
+      Height          =   22
+      HelpTag         =   ""
+      Index           =   -2147483648
+      Italic          =   False
+      Left            =   565
+      LimitText       =   0
+      LockBottom      =   False
+      LockedInPosition=   False
+      LockLeft        =   False
+      LockRight       =   True
+      LockTop         =   True
+      Mask            =   ""
+      Password        =   False
+      ReadOnly        =   False
+      Scope           =   0
+      TabIndex        =   22
+      TabPanelIndex   =   0
+      TabStop         =   True
+      Text            =   ""
+      TextColor       =   &c00000000
+      TextFont        =   "System"
+      TextSize        =   0.0
+      TextUnit        =   0
+      Top             =   20
+      Underline       =   False
+      UseFocusRing    =   True
+      Visible         =   True
+      Width           =   170
+   End
+   Begin PopupMenu ContactsListBoxActionPopup
+      AutoDeactivate  =   True
+      Bold            =   False
+      DataField       =   ""
+      DataSource      =   ""
+      Enabled         =   True
+      Height          =   20
+      HelpTag         =   ""
+      Index           =   -2147483648
+      InitialParent   =   ""
+      InitialValue    =   ""
+      Italic          =   False
+      Left            =   388
+      ListIndex       =   0
+      LockBottom      =   False
+      LockedInPosition=   False
+      LockLeft        =   False
+      LockRight       =   True
+      LockTop         =   True
+      Scope           =   0
+      TabIndex        =   23
+      TabPanelIndex   =   0
+      TabStop         =   True
+      TextFont        =   "System"
+      TextSize        =   0.0
+      TextUnit        =   0
+      Top             =   21
+      Underline       =   False
+      Visible         =   True
+      Width           =   165
+   End
 End
 #tag EndWindow
 
 #tag WindowCode
 	#tag Event
 		Sub Open()
+		  
 		  dim theListboxHeaders(), theListboxFields() as text
+		  dim theListboxActionsColumnsAll as Boolean
+		  dim theListboxActionsTypes(), theListboxActionsColumns(), theListboxActionsFields() as text
+		  
+		  dim theFilterText as text
+		  dim theFilterColumns() as string
 		  
 		  // CONTACTS
 		  
@@ -670,7 +752,7 @@ End
 		  edTableContacts.tableKeyValue = ""
 		  
 		  // Load the Data using the DB Table Info. Will be: 'SELECT * from Contacts'.
-		  edTableContacts.loadFromDB
+		  edTableContacts.loadFromDB( "" )
 		  
 		  // Register the Controls ( Name, Field, Label, Enabled )
 		  edTableContacts.controlRegister( "ContactUUIDTextField", "UUID", "", false )
@@ -683,8 +765,15 @@ End
 		  theListboxFields() = Array ( "Company", "NameFirst", "NameLast" )
 		  edTableContacts.controlRegisterListbox( "ContactsListbox", theListboxHeaders(), theListboxFields(), true )
 		  
+		  // Register the Listbox Actions ( Name, ActionPopupName, ActionTextFieldName, ActionsTypes(), ColumnsAll, Columns(), Fields() )
+		  theListboxActionsTypes = Array ( "Filter By", "Find By" )
+		  theListboxActionsColumnsAll = true
+		  theListboxActionsColumns = Array ( "Company", "First Name", "Last Name" )
+		  theListboxActionsFields = Array ( "Company", "NameFirst", "NameLast" )
+		  edTableContacts.controlRegisterListboxActions( "ContactsListbox", "ContactsListBoxActionPopup", "ContactsListBoxActionTextField", theListboxActionsTypes(), theListboxActionsColumnsAll, theListboxActionsColumns(), theListboxActionsFields() )
+		  
 		  // Populate the Data into the ListBox
-		  edTableContacts.controlSet( "ContactsListbox", -2 )  // -2 = all records
+		  edTableContacts.controlSet( "ContactsListbox", -2,  theFilterText, theFilterColumns() )  // -2 = all records
 		End Sub
 	#tag EndEvent
 
@@ -696,11 +785,15 @@ End
 		Sub Change()
 		  dim theListboxHeaders(), theListboxFields() as text
 		  dim theTableNameKeyValue as text
+		  dim theFilterText as text
+		  dim theFilterColumns() as string
+		  
+		  if me.ListIndex = -1 then return
 		  
 		  // Get the Primary Key
 		  theTableNameKeyValue = me.RowTag( me.ListIndex )
 		  // Update the Fields
-		  edTableContacts.controlSet( "Control", me.ListIndex )  // -2 = all records
+		  edTableContacts.controlSet( "Control", me.ListIndex, theFilterText, theFilterColumns() )  // -2 = all records
 		  
 		  // ================================================
 		  
@@ -712,7 +805,7 @@ End
 		  edTableContactsAddresses.tableKeyValue = theTableNameKeyValue  // The key of the contact.
 		  
 		  // Load the Data using the DB Table Info. Will be: SELECT * FROM ContactsAddresses WHERE UUIDContact = 'xxx', but xxx will be the value of the UUIDTextField
-		  edTableContactsAddresses.loadFromDB
+		  edTableContactsAddresses.loadFromDB( "" )
 		  
 		  // Register the Listbox ( Name, Headers, Fields, Enabled ) The Headers and Fields are just arrays of text.
 		  theListboxHeaders() = Array ( "Street", "City", "State", "Zip", "County" )
@@ -720,7 +813,7 @@ End
 		  edTableContactsAddresses.controlRegisterListbox( "ContactsAddressesListbox", theListboxHeaders(), theListboxFields(), true )
 		  
 		  // Populate the Data into the ListBox
-		  edTableContactsAddresses.controlSet( "ContactsAddressesListbox", -2 )  // -2 = all records
+		  edTableContactsAddresses.controlSet( "ContactsAddressesListbox", -2,  theFilterText, theFilterColumns() )  // -2 = all records
 		  
 		  // ================================================
 		  
@@ -732,7 +825,7 @@ End
 		  edTableContactsComms.tableKeyValue = theTableNameKeyValue  // The key of the contact.
 		  
 		  // Load the Data using the DB Table Info. Will be: SELECT * FROM ContactsComms WHERE UUIDContact = 'xxx', but xxx will be the value of the UUIDTextField
-		  edTableContactsComms.loadFromDB
+		  edTableContactsComms.loadFromDB( "" )
 		  
 		  
 		  // Register the Listbox ( Name, Headers, Fields, Enabled ) The Headers and Fields are just arrays of text.
@@ -741,7 +834,7 @@ End
 		  edTableContactsComms.controlRegisterListbox( "ContactsCommsListbox", theListboxHeaders(), theListboxFields(), true )
 		  
 		  // Populate the Data into the ListBox
-		  edTableContactsComms.controlSet( "ContactsCommsListbox", -2 )  // -2 = all records
+		  edTableContactsComms.controlSet( "ContactsCommsListbox", -2,  theFilterText, theFilterColumns() )  // -2 = all records
 		  
 		End Sub
 	#tag EndEvent
@@ -765,6 +858,26 @@ End
 		Sub LostFocus()
 		  edTableContacts.controlSave( me.Name.ToText, ContactUUIDTextField.Text.ToText, me.Text.ToText )
 		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events ContactsListBoxActionTextField
+	#tag Event
+		Sub LostFocus()
+		  edTableContacts.filterfindListbox
+		End Sub
+	#tag EndEvent
+	#tag Event
+		Function KeyDown(Key As String) As Boolean
+		  
+		  // Filter of find if Return or Enter is Pressed
+		  'MsgBox key.asc.ToText
+		  if key.asc = 13 or key.asc = 3 then
+		    edTableContacts.filterfindListbox
+		    return true
+		  else
+		    return false
+		  end if
+		End Function
 	#tag EndEvent
 #tag EndEvents
 #tag ViewBehavior
