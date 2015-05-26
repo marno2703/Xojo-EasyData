@@ -286,7 +286,7 @@ Inherits control
 		  theColumnNames = Split( theActionValues( 1 ).ToText, "," )
 		  
 		  // Get the ActionTextBox value
-		  theActionTextBox = "%" + TextField( theActionTextFieldControl ).Text.ToText + "%"
+		  theActionTextBox = TextField( theActionTextFieldControl ).Text.ToText
 		  
 		  // ============================================
 		  
@@ -318,7 +318,7 @@ Inherits control
 		    end if
 		    // add the column wit hthe comparion term
 		    For theColumnNameIndex as Integer = 0 to theColumnNames.Ubound
-		      sql = sql + theColumnNames( theColumnNameIndex ).ToText + " " + sqlComparisonOperator + " " + chr( 39 ).ToText + theActionTextBox + chr( 39 ).ToText
+		      sql = sql + theColumnNames( theColumnNameIndex ).ToText + " " + sqlComparisonOperator + " " + chr( 39 ).ToText + "%" + theActionTextBox + "%" + chr( 39 ).ToText
 		      // add an OR if not on the last columname
 		      if theColumnNameIndex <> theColumnNames.Ubound then
 		        sql = sql + " OR "
