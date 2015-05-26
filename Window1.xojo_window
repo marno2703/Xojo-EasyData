@@ -752,7 +752,7 @@ End
 		  edTableContacts.tableKeyValue = ""
 		  
 		  // Load the Data using the DB Table Info. Will be: 'SELECT * from Contacts'.
-		  edTableContacts.loadFromDB
+		  edTableContacts.loadFromDB( "" )
 		  
 		  // Register the Controls ( Name, Field, Label, Enabled )
 		  edTableContacts.controlRegister( "ContactUUIDTextField", "UUID", "", false )
@@ -773,7 +773,7 @@ End
 		  edTableContacts.controlRegisterListboxActions( "ContactsListbox", "ContactsListBoxActionPopup", "ContactsListBoxActionTextField", theListboxActionsTypes(), theListboxActionsColumnsAll, theListboxActionsColumns(), theListboxActionsFields() )
 		  
 		  // Populate the Data into the ListBox
-		  edTableContacts.controlSet( "ContactsListbox", -2,  theFilterText, theFilterColumns() )  // -2 = all records 
+		  edTableContacts.controlSet( "ContactsListbox", -2,  theFilterText, theFilterColumns() )  // -2 = all records
 		End Sub
 	#tag EndEvent
 
@@ -805,7 +805,7 @@ End
 		  edTableContactsAddresses.tableKeyValue = theTableNameKeyValue  // The key of the contact.
 		  
 		  // Load the Data using the DB Table Info. Will be: SELECT * FROM ContactsAddresses WHERE UUIDContact = 'xxx', but xxx will be the value of the UUIDTextField
-		  edTableContactsAddresses.loadFromDB
+		  edTableContactsAddresses.loadFromDB( "" )
 		  
 		  // Register the Listbox ( Name, Headers, Fields, Enabled ) The Headers and Fields are just arrays of text.
 		  theListboxHeaders() = Array ( "Street", "City", "State", "Zip", "County" )
@@ -825,7 +825,7 @@ End
 		  edTableContactsComms.tableKeyValue = theTableNameKeyValue  // The key of the contact.
 		  
 		  // Load the Data using the DB Table Info. Will be: SELECT * FROM ContactsComms WHERE UUIDContact = 'xxx', but xxx will be the value of the UUIDTextField
-		  edTableContactsComms.loadFromDB
+		  edTableContactsComms.loadFromDB( "" )
 		  
 		  
 		  // Register the Listbox ( Name, Headers, Fields, Enabled ) The Headers and Fields are just arrays of text.
@@ -865,6 +865,19 @@ End
 		Sub LostFocus()
 		  edTableContacts.filterfindListbox
 		End Sub
+	#tag EndEvent
+	#tag Event
+		Function KeyDown(Key As String) As Boolean
+		  
+		  // Filter of find if Return or Enter is Pressed
+		  'MsgBox key.asc.ToText
+		  if key.asc = 13 or key.asc = 3 then
+		    edTableContacts.filterfindListbox
+		    return true
+		  else
+		    return false
+		  end if
+		End Function
 	#tag EndEvent
 #tag EndEvents
 #tag ViewBehavior

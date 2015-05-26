@@ -214,7 +214,7 @@ Inherits control
 		            end if
 		          Next
 		        else
-		          // Add the Row if there is no filter 
+		          // Add the Row if there is no filter
 		          addRow = true
 		        end if
 		        // Add the Row if allowed
@@ -276,7 +276,7 @@ Inherits control
 		  
 		  // Return if no Action is Selected
 		  if PopupMenu( theActionPopupControl ).ListIndex = -1 then Return
-		  // Return if the RowTag is Nil, but it's not possble to choose a Separator Row 
+		  // Return if the RowTag is Nil, but it's not possble to choose a Separator Row
 		  if PopupMenu( theActionPopupControl ).RowTag( PopupMenu( theActionPopupControl ).ListIndex ) = nil then return
 		  
 		  // Get the ActionPopup value
@@ -286,14 +286,14 @@ Inherits control
 		  theColumnNames = Split( theActionValues( 1 ).ToText, "," )
 		  
 		  // Get the ActionTextBox value
-		  theActionTextBox = TextField( theActionTextFieldControl ).Text.ToText
+		  theActionTextBox = "%" + TextField( theActionTextFieldControl ).Text.ToText + "%"
 		  
 		  // ============================================
 		  
 		  if theActionName = "Filter By" then
 		    
 		    // Update the Update the Listbox with the db if the ActionTextBox is empty
-		    controlSet( "ContactsListbox", -2, theActionTextBox, theColumnNames )  // -2 = all records 
+		    controlSet( "ContactsListbox", -2, theActionTextBox, theColumnNames )  // -2 = all records
 		    
 		    'MsgBox "Filtered: " + theActionTextBox
 		    
@@ -306,12 +306,12 @@ Inherits control
 		    // Select the Records
 		    sql = "SELECT * FROM " + tableName
 		    
-		    // if we have a '%' in the search term, use like otherwise equal
-		    if theActionTextBox.IndexOf( "%" ) = -1 then
-		      sqlComparisonOperator = "="
-		    Else
-		      sqlComparisonOperator = "LIKE"
-		    end if
+		    '// if we have a '%' in the search term, use like otherwise equal
+		    'if theActionTextBox.IndexOf( "%" ) = -1 then
+		    'sqlComparisonOperator = "="
+		    'Else
+		    sqlComparisonOperator = "LIKE"
+		    'end if
 		    // if we have columns, add  the where
 		    if theColumnNames.Ubound > -1 then
 		      sql = sql + " WHERE "
@@ -325,11 +325,15 @@ Inherits control
 		      end if
 		    next
 		    
-		    MsgBox "Query: " + sql
+		    loadFromDB( sql )
+		    controlSet( "ContactsListbox", -2, "", nil )  // -2 = all records
+		    
+		    'MsgBox "Query: " + sql
 		    
 		  end if
 		  
 		  // ============================================
+		  
 		End Sub
 	#tag EndMethod
 
@@ -385,15 +389,23 @@ Inherits control
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub loadFromDB()
+		Sub loadFromDB(pSQL as text)
 		  // Reset the Dictionary
 		  ReDim dataDict(-1)
 		  
-		  // Select the Records
-		  sql = "SELECT * FROM " + tableName
-		  
-		  if tableKeyName <> "" and tableKeyValue <> "" then
-		    sql = sql + " WHERE " + tableKeyName + " = " + chr( 39 ).ToText + tableKeyValue + chr( 39 ).ToText
+		  if pSQL = "" then
+		    
+		    // Select the Records
+		    sql = "SELECT * FROM " + tableName
+		    
+		    if tableKeyName <> "" and tableKeyValue <> "" then
+		      sql = sql + " WHERE " + tableKeyName + " = " + chr( 39 ).ToText + tableKeyValue + chr( 39 ).ToText
+		    end if
+		    
+		  else
+		    
+		    sql = pSql
+		    
 		  end if
 		  
 		  //===================================
