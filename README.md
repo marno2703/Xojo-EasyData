@@ -5,7 +5,7 @@ I come from a background in FileMaker development and I'm also a Xojo developer.
 
 This Desktop app reads from a sqlite database file, shows contacts in a window, and shows the details when a contact is clicked.
 
-Overview Video: https://www.youtube.com/watch?v=-aoPkGX7XWQ
+Overview Video: https://www.youtube.com/watch?v=niRX4Ly0Gww
 
 FileMaker makes our life easy and as a FileMaker Developer, you could go years if not ever using SQL. In Xojo and other system like php/mysql you have to do everything yourself and I tend to be lazy and annoyed when I have to do redundant work. In Xojo, you would create a window and put listboxes and textfields on it which have no inherent connection to a database. They are simply a control that can show data. To put data in it from a database, you'd perform a SQL statement like 'SELECT * FROM Contacts' which would return a set of records. Then you'd go record by record and set each field, one by one. Normally this means you need to loop thru the records and then assign the field by typing out each textbox name = the field in the recordset by name. That's not a big deal, but when you get to 20 fields on your eight window, it becomes very annoying.
 
