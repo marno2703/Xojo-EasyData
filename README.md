@@ -17,6 +17,7 @@ Once you open the project look at these first:
 - In the ContactsListbox, look at the Change Event Handler. This sets the values to the textfields, registers and set the ContactsAddressesListbox, and registers and set the ContactsCommsListbox.
 - Editing a value in a TextField will look thru the registered controls and listboxes for any TextFields and Listboxes with a column that uses the same database field and update its value. Finally, it saves the value to the database.
 - Filtering and Finding have been added. Filtering shows the records that match the text on the previously found records. Finding replaces the found set of records with a new found set. You can Filter or Find on each or all of the columns.
+- Filtering and Finding Stats have been added. You can optionally create a Label to show the number of records that are filtered and found by adding the name of the control and the stats format when registering a Listbox. An example would be "[ {Filtered / }Found ]". The words Filtered and Found will be replaced their respective numbers. Filtered will not be shown if there are no filtered records. Anything between "{" and "}" is part of the Filtered Text. 
 
 At first it may seem complex, but when you break it down, it's very simple and can be used over and over again.
 

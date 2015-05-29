@@ -17,7 +17,7 @@ Inherits control
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub controlRegisterListbox(pName as text, pHeader() as text, pFields() as text, pEnable as Boolean)
+		Sub controlRegisterListbox(pName as text, pHeader() as text, pFields() as text, pEnable as Boolean, pStatsName as text, pStatsFormat as text)
 		  
 		  // Register a Listbox
 		  ReDim controlDict( controlDict.Ubound + 1 )
@@ -28,6 +28,8 @@ Inherits control
 		  controlDict( controlDict.Ubound ).Value( "Headers" ) = pHeader()
 		  controlDict( controlDict.Ubound ).Value( "Fields" ) = pFields()
 		  controlDict( controlDict.Ubound ).Value( "Enable" ) = pEnable
+		  controlDict( controlDict.Ubound ).Value( "StatsName" ) = pStatsName
+		  controlDict( controlDict.Ubound ).Value( "StatsFormat" ) = pStatsFormat
 		End Sub
 	#tag EndMethod
 
@@ -175,6 +177,13 @@ Inherits control
 		  dim theControlDictElement as Integer
 		  dim theListboxHeaders(), theListboxFields() as text
 		  
+		  dim hasStats as boolean
+		  dim theStatsControlName, theStatsFormat, theStatsFilteredFormat as text
+		  dim theStatsFilteredFormatStart, theStatsFilteredFormatEnd as Integer
+		  dim theStatsControlIndex as integer
+		  dim theStatsControl as Control
+		  dim theStatsFound, theStatsFiltered as integer
+		  
 		  dim addRow as Boolean
 		  
 		  // Look at each Control in the Container
@@ -186,10 +195,23 @@ Inherits control
 		    
 		    // Populate our Listbox
 		    if theControlName = pControlName and theControl IsA Listbox then
+		      
+		      // Get the info on the Registered Control
+		      theControlDictElement = findControlDictElementByName( pControlName )
+		      
+		      // Prep for the Stats
+		      if controlDict( theControlDictElement ).HasKey( "StatsName" ) and controlDict( theControlDictElement ).HasKey( "StatsFormat" ) then
+		        theStatsControlName = controlDict( theControlDictElement ).Value( "StatsName" ) 
+		        theStatsControlIndex = findControlByName( theStatsControlName )
+		        theStatsControl = me.Window.Control( theStatsControlIndex )
+		        theStatsFormat = controlDict( theControlDictElement ).Value( "StatsFormat" ) 
+		        hasStats = true
+		      else
+		        hasStats = false
+		      end if
+		      
 		      // Clear the ListBox
 		      ListBox( theControl ).DeleteAllRows
-		      
-		      theControlDictElement = findControlDictElementByName( pControlName )
 		      
 		      // Set the Number of Columns in the ListBox
 		      theListboxHeaders() = controlDict( theControlDictElement ).Value( "Headers" )
@@ -230,6 +252,38 @@ Inherits control
 		        end if
 		      Next
 		      
+		      // Set the Stats
+		      if hasStats then
+		        // Get the Counts
+		        theStatsFound = dataDict.Ubound // How many Found?
+		        theStatsFiltered = ListBox( theControl ).ListCount - 1 // How many Filtered
+		        // Get the Custom Filtered Format
+		        // Example: "[ {Filtered / }Found ]"
+		        // The words Filtered and Found will be replaced their respective numbers.
+		        // Filtered will not be shown if = 0
+		        // Anything between "{" and "}" is part of the Filtered Text. 
+		        theStatsFilteredFormatStart = theStatsFormat.IndexOf( "{" )
+		        theStatsFilteredFormatEnd = theStatsFormat.IndexOf( "}" )
+		        if theStatsFilteredFormatEnd > -1 and theStatsFilteredFormatEnd > -1 then
+		          theStatsFilteredFormat = theStatsFormat.mid( theStatsFilteredFormatStart, theStatsFilteredFormatEnd - theStatsFilteredFormatStart + 1 )
+		        else
+		          theStatsFilteredFormat = "Filtered"
+		        end if
+		        // Don't show Filtered if there are none filtered...
+		        if theStatsFiltered = theStatsFound then
+		          theStatsFormat = theStatsFormat.Replace( theStatsFilteredFormat, "" )
+		        else
+		          theStatsFormat = theStatsFormat.Replace( "{", "" )
+		          theStatsFormat = theStatsFormat.Replace( "}", "" )
+		          theStatsFiltered = theStatsFiltered + 1
+		          theStatsFormat = theStatsFormat.Replace( "Filtered", theStatsFiltered.ToText )
+		        end if
+		        theStatsFound = theStatsFound + 1
+		        theStatsFormat = theStatsFormat.Replace( "Found", theStatsFound.ToText )
+		        Label( theStatsControl ).text = theStatsFormat
+		      end if
+		      
+		      // Enable the Control / ListBox 
 		      ListBox( theControl ).Enabled = controlDict( theControlDictElement ).Value( "Enable" )
 		      
 		    end if
@@ -242,7 +296,9 @@ Inherits control
 		      
 		      // TextFields
 		      if theControl IsA TextField then
+		        // Set
 		        TextField( theControl ).Text = dataDict( pRow ).Value( controlDict( theControlDictElement ).Value( "Field" ) )
+		        // Enable the Control
 		        TextField( theControl ).Enabled = controlDict( theControlDictElement ).Value( "Enable" )
 		      end if
 		      

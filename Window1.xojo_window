@@ -54,11 +54,11 @@ Begin Window Window1
       TextFont        =   "System"
       TextSize        =   0.0
       TextUnit        =   0
-      Top             =   20
+      Top             =   21
       Transparent     =   False
       Underline       =   False
       Visible         =   True
-      Width           =   100
+      Width           =   87
    End
    Begin Label ContactsDetailLabel
       AutoDeactivate  =   True
@@ -730,6 +730,40 @@ Begin Window Window1
       Visible         =   True
       Width           =   165
    End
+   Begin Label ContactsListStatsLabel
+      AutoDeactivate  =   True
+      Bold            =   False
+      DataField       =   ""
+      DataSource      =   ""
+      Enabled         =   True
+      Height          =   20
+      HelpTag         =   ""
+      Index           =   -2147483648
+      InitialParent   =   ""
+      Italic          =   False
+      Left            =   119
+      LockBottom      =   False
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   False
+      LockTop         =   True
+      Multiline       =   False
+      Scope           =   0
+      Selectable      =   False
+      TabIndex        =   24
+      TabPanelIndex   =   0
+      Text            =   "[ {Filtered / }Found ]"
+      TextAlign       =   0
+      TextColor       =   &c00000000
+      TextFont        =   "System"
+      TextSize        =   0.0
+      TextUnit        =   0
+      Top             =   21
+      Transparent     =   False
+      Underline       =   False
+      Visible         =   True
+      Width           =   131
+   End
 End
 #tag EndWindow
 
@@ -760,10 +794,10 @@ End
 		  edTableContacts.controlRegister( "NameFirstTextField", "NameFirst", "NameFirstLabel", true )
 		  edTableContacts.controlRegister( "NameLastTextField", "NameLast", "NameLastLabel", true )
 		  
-		  // Register the Listbox ( Name, Headers, Fields, Enabled ) The Headers and Fields are just arrays of text.
+		  // Register the Listbox ( Name, Headers, Fields, Enabled, StatsName, StatsFormat ) The Headers and Fields are just arrays of text.
 		  theListboxHeaders() = Array ( "Company", "First Name", "Last Name" )
 		  theListboxFields() = Array ( "Company", "NameFirst", "NameLast" )
-		  edTableContacts.controlRegisterListbox( "ContactsListbox", theListboxHeaders(), theListboxFields(), true )
+		  edTableContacts.controlRegisterListbox( "ContactsListbox", theListboxHeaders(), theListboxFields(), true, "ContactsListStatsLabel", "[ {Filtered / }Found ]" )
 		  
 		  // Register the Listbox Actions ( Name, ActionPopupName, ActionTextFieldName, ActionsTypes(), ColumnsAll, Columns(), Fields() )
 		  theListboxActionsTypes = Array ( "Filter By", "Find By" )
@@ -807,10 +841,10 @@ End
 		  // Load the Data using the DB Table Info. Will be: SELECT * FROM ContactsAddresses WHERE UUIDContact = 'xxx', but xxx will be the value of the UUIDTextField
 		  edTableContactsAddresses.loadFromDB( "" )
 		  
-		  // Register the Listbox ( Name, Headers, Fields, Enabled ) The Headers and Fields are just arrays of text.
+		  // Register the Listbox ( Name, Headers, Fields, Enabled, StatsName, StatsFormat ) The Headers and Fields are just arrays of text.
 		  theListboxHeaders() = Array ( "Street", "City", "State", "Zip", "County" )
 		  theListboxFields() = Array ( "Street", "City", "State", "Zip", "County" )
-		  edTableContactsAddresses.controlRegisterListbox( "ContactsAddressesListbox", theListboxHeaders(), theListboxFields(), true )
+		  edTableContactsAddresses.controlRegisterListbox( "ContactsAddressesListbox", theListboxHeaders(), theListboxFields(), true, "", "" )
 		  
 		  // Populate the Data into the ListBox
 		  edTableContactsAddresses.controlSet( "ContactsAddressesListbox", -2,  theFilterText, theFilterColumns() )  // -2 = all records
@@ -828,10 +862,10 @@ End
 		  edTableContactsComms.loadFromDB( "" )
 		  
 		  
-		  // Register the Listbox ( Name, Headers, Fields, Enabled ) The Headers and Fields are just arrays of text.
+		  // Register the Listbox ( Name, Headers, Fields, Enabled, StatsName, StatsFormat ) The Headers and Fields are just arrays of text.
 		  theListboxHeaders() = Array ( "Type", "Data" )
 		  theListboxFields() = Array ( "Type", "Data" )
-		  edTableContactsComms.controlRegisterListbox( "ContactsCommsListbox", theListboxHeaders(), theListboxFields(), true )
+		  edTableContactsComms.controlRegisterListbox( "ContactsCommsListbox", theListboxHeaders(), theListboxFields(), true, "", "" )
 		  
 		  // Populate the Data into the ListBox
 		  edTableContactsComms.controlSet( "ContactsCommsListbox", -2,  theFilterText, theFilterColumns() )  // -2 = all records
