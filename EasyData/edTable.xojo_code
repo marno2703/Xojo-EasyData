@@ -311,6 +311,12 @@ Inherits control
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function escapeString(value as text) As text
+		  return value.ReplaceAll(chr(39).ToText, chr(39).ToText+chr(39).ToText)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub filterfindListbox()
 		  
 		  dim theActionPopupName, theActionTextFieldName as text
@@ -374,7 +380,7 @@ Inherits control
 		    end if
 		    // add the column wit hthe comparion term
 		    For theColumnNameIndex as Integer = 0 to theColumnNames.Ubound
-		      sql = sql + theColumnNames( theColumnNameIndex ).ToText + " " + sqlComparisonOperator + " " + chr( 39 ).ToText + "%" + theActionTextBox + "%" + chr( 39 ).ToText
+		      sql = sql + theColumnNames( theColumnNameIndex ).ToText + " " + sqlComparisonOperator + " " + chr( 39 ).ToText + "%" + escapeString(theActionTextBox) + "%" + chr( 39 ).ToText
 		      // add an OR if not on the last columname
 		      if theColumnNameIndex <> theColumnNames.Ubound then
 		        sql = sql + " OR "
